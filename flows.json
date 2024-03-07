@@ -1,0 +1,328 @@
+[
+    {
+        "id": "6208cb657efddc1b",
+        "type": "mqtt in",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "topic": "/spo2",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 260,
+        "wires": [
+            [
+                "f348095b14c64de5",
+                "242513a62766629c"
+            ]
+        ]
+    },
+    {
+        "id": "410e9a632435c6e9",
+        "type": "mqtt in",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "topic": "/tempValue",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 320,
+        "wires": [
+            [
+                "f348095b14c64de5",
+                "189c0a4a106ae292"
+            ]
+        ]
+    },
+    {
+        "id": "f348095b14c64de5",
+        "type": "join",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "10",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 330,
+        "y": 380,
+        "wires": [
+            [
+                "8a0600f89ecab56e"
+            ]
+        ]
+    },
+    {
+        "id": "7f087cfef8d38f5d",
+        "type": "ui_table",
+        "z": "d49ebea03da5a2fb",
+        "group": "2f5937d8d53a7826",
+        "name": "Data Table",
+        "order": 1,
+        "width": 18,
+        "height": 4,
+        "columns": [
+            {
+                "field": "timeStamp",
+                "title": "Time Stamp",
+                "width": "30%",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "/heartRate",
+                "title": "Heart Rate",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "/spo2",
+                "title": "SPO2",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "/tempValue",
+                "title": "Temperature",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "sugar",
+                "title": "Blood Sugar",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            }
+        ],
+        "outputs": 0,
+        "cts": false,
+        "x": 710,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "8a0600f89ecab56e",
+        "type": "function",
+        "z": "d49ebea03da5a2fb",
+        "name": "AddToArray",
+        "func": "var tableData = flow.get(\"savedData\") || []\n\nmsg.payload[\"timeStamp\"] = new Date().toLocaleString()\n\n// Add sugar to payload by formula Blood Glucose Level=0.5×Heart Rate+0.5×SpO2+0.2×Temperature\nmsg.payload[\"sugar\"] = 0.5*msg.payload[\"/heartRate\"] \n                        + 0.5*msg.payload[\"/heartRate\"]\n                        +0.2*msg.payload[\"/tempValue\"]\n// Unshift msg.payload to tableData\ntableData.unshift( msg.payload)\n// set msg.payload as tableData\nmsg.payload = tableData\n\nflow.set(\"savedData\", tableData)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\nflow.set(\"savedData\", [])",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 240,
+        "wires": [
+            [
+                "7f087cfef8d38f5d"
+            ]
+        ]
+    },
+    {
+        "id": "85e4e0d3f7f5aac3",
+        "type": "mqtt in",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "topic": "/heartRate",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 200,
+        "wires": [
+            [
+                "f348095b14c64de5",
+                "ba1fccc812fef55f"
+            ]
+        ]
+    },
+    {
+        "id": "ba1fccc812fef55f",
+        "type": "ui_gauge",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "group": "5dc35719525d8fd9",
+        "order": 1,
+        "width": 6,
+        "height": 3,
+        "gtype": "gage",
+        "title": "Heart rate",
+        "label": "bpm",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "675",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 340,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "242513a62766629c",
+        "type": "ui_gauge",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "group": "5dc35719525d8fd9",
+        "order": 2,
+        "width": 6,
+        "height": 3,
+        "gtype": "gage",
+        "title": "SPO2",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 330,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "189c0a4a106ae292",
+        "type": "ui_gauge",
+        "z": "d49ebea03da5a2fb",
+        "name": "",
+        "group": "5dc35719525d8fd9",
+        "order": 3,
+        "width": 6,
+        "height": 3,
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "c",
+        "format": "{{value}}",
+        "min": "-40",
+        "max": "80",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 350,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "ac6659385df72324",
+        "type": "mqtt-broker",
+        "name": "C140",
+        "broker": "broker.emqx.io",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "2f5937d8d53a7826",
+        "type": "ui_group",
+        "name": "Reading History",
+        "tab": "5203ed20c620594e",
+        "order": 2,
+        "disp": true,
+        "width": "18",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5dc35719525d8fd9",
+        "type": "ui_group",
+        "name": "Live Tracking",
+        "tab": "5203ed20c620594e",
+        "order": 1,
+        "disp": true,
+        "width": 18,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5203ed20c620594e",
+        "type": "ui_tab",
+        "name": "146 PCP",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
